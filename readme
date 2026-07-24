@@ -1,15 +1,5 @@
-# Cardápio — Toca do Delivery
 
 Site de cardápio de página única, pronto para publicar gratuitamente no **GitHub Pages**.
-
-## Como publicar
-
-1. Crie um repositório novo no GitHub (ex.: `toca-do-delivery`).
-2. Envie o arquivo `index.html` deste pacote para a raiz do repositório (pode arrastar e soltar direto na página do GitHub, em "Add file" → "Upload files").
-3. No repositório, vá em **Settings → Pages**.
-4. Em "Build and deployment", escolha **Source: Deploy from a branch**, branch **main**, pasta **/(root)**, e clique em **Save**.
-5. Em alguns minutos o site fica disponível em algo como:
-   `https://SEU-USUARIO.github.io/toca-do-delivery/`
 
 ## O que o site já faz
 
@@ -19,6 +9,3 @@ Site de cardápio de página única, pronto para publicar gratuitamente no **Git
 - O botão "Enviar pedido pelo WhatsApp" monta uma mensagem automática com os itens, quantidades e total, e abre direto no WhatsApp (44) 99909-1697.
 - Funciona bem no celular (é onde a maioria dos clientes vai acessar).
 
-## Editar o cardápio depois
-
-Todo o conteúdo (nomes, descrições e preços) fica em um só lugar dentro do `index.html`, no trecho `const menuData = [...]`. Para trocar um preço ou adicionar um prato novo, edite esse trecho e suba o arquivo atualizado no GitHub — não precisa mexer no resto do código.
