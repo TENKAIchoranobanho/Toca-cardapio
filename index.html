@@ -344,6 +344,56 @@
     background:none; border:none; width:100%;
   }
 
+  .delivery-form{
+    padding:4px 0 16px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:14px;
+  }
+  .delivery-form .field-label{
+    display:block;
+    font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); font-weight:700; margin:12px 0 6px;
+  }
+  .delivery-form .field-label:first-child{margin-top:0;}
+  .delivery-form input{
+    width:100%;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    padding:11px 14px;
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .delivery-form input::placeholder{color:var(--muted); opacity:.7;}
+  .delivery-form input:focus{border-color:var(--gold);}
+  .delivery-form select{
+    width:100%;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    padding:11px 14px;
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s ease;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a6957c' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px;
+  }
+  .delivery-form select:focus{border-color:var(--gold);}
+  #changeField{display:none;}
+  #changeField.visible{display:block;}
+  .delivery-form .hint{
+    font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4;
+  }
+
   @media (max-width:480px){
     .item{flex-direction:column;}
     .item-side{flex-direction:row; width:100%; justify-content:space-between; align-items:center;}
@@ -420,6 +470,26 @@
   </div>
   <div class="drawer-body" id="drawerBody"></div>
   <div class="drawer-foot">
+    <div class="delivery-form">
+      <label class="field-label" for="addressInput">Endereço de entrega</label>
+      <input type="text" id="addressInput" placeholder="Rua, bairro">
+      <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
+      <input type="text" id="numberInput" placeholder="Ex.: 123 — deixe em branco se não tiver">
+      <label class="field-label" for="refInput">Ponto de referência</label>
+      <input type="text" id="refInput" placeholder="Ex.: perto do mercado, portão azul...">
+      <label class="field-label" for="paymentInput">Forma de pagamento</label>
+      <select id="paymentInput">
+        <option value="">Selecione...</option>
+        <option value="Pix">Pix</option>
+        <option value="Cartão de crédito">Cartão de crédito (na entrega)</option>
+        <option value="Cartão de débito">Cartão de débito (na entrega)</option>
+        <option value="Dinheiro">Dinheiro</option>
+      </select>
+      <div class="field-label" id="changeField">Troco para quanto?
+        <input type="text" id="changeInput" placeholder="Ex.: 100,00 — deixe em branco se não precisar" style="margin-top:6px; text-transform:none;">
+      </div>
+      <div class="hint">Essas informações vão junto na mensagem do WhatsApp.</div>
+    </div>
     <div class="subtotal-row">
       <span>Subtotal</span>
       <span class="value" id="drawerTotal">R$ 0,00</span>
@@ -548,11 +618,43 @@
 
   // ---------- Cart logic ----------
   const CART_KEY = 'toca-do-delivery-cart-v1';
+  const ADDRESS_KEY = 'toca-do-delivery-address-v1';
   let cart = {};
   try{ cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }catch(e){ cart = {}; }
 
   function saveCart(){
     try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){}
+  }
+
+  function saveAddress(){
+    try{
+      localStorage.setItem(ADDRESS_KEY, JSON.stringify({
+        address: document.getElementById('addressInput').value,
+        number: document.getElementById('numberInput').value,
+        ref: document.getElementById('refInput').value,
+        payment: document.getElementById('paymentInput').value,
+        change: document.getElementById('changeInput').value
+      }));
+    }catch(e){}
+  }
+
+  function loadAddress(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(ADDRESS_KEY) || '{}');
+      if(saved.address) document.getElementById('addressInput').value = saved.address;
+      if(saved.number) document.getElementById('numberInput').value = saved.number;
+      if(saved.ref) document.getElementById('refInput').value = saved.ref;
+      if(saved.payment){
+        document.getElementById('paymentInput').value = saved.payment;
+        toggleChangeField();
+      }
+      if(saved.change) document.getElementById('changeInput').value = saved.change;
+    }catch(e){}
+  }
+
+  function toggleChangeField(){
+    const isCash = document.getElementById('paymentInput').value === 'Dinheiro';
+    document.getElementById('changeField').classList.toggle('visible', isCash);
   }
 
   function cartTotals(){
@@ -653,15 +755,36 @@
     renderAll();
   });
 
+  document.getElementById('addressInput').addEventListener('input', saveAddress);
+  document.getElementById('numberInput').addEventListener('input', saveAddress);
+  document.getElementById('refInput').addEventListener('input', saveAddress);
+  document.getElementById('changeInput').addEventListener('input', saveAddress);
+  document.getElementById('paymentInput').addEventListener('change', () => { toggleChangeField(); saveAddress(); });
+  loadAddress();
+
   document.getElementById('sendBtn').addEventListener('click', () => {
     const entries = Object.values(cart).filter(l => l.qty > 0);
     if(entries.length === 0) return;
     const {total} = cartTotals();
+    const address = document.getElementById('addressInput').value.trim();
+    const number = document.getElementById('numberInput').value.trim();
+    const ref = document.getElementById('refInput').value.trim();
+    const payment = document.getElementById('paymentInput').value.trim();
+    const change = document.getElementById('changeInput').value.trim();
     let msg = 'Olá! Gostaria de fazer o seguinte pedido na *Toca do Delivery*:\n\n';
     entries.forEach(l => {
       msg += `• ${l.qty}x ${l.name} — R$ ${fmt(l.qty * l.price)}\n`;
     });
-    msg += `\n*Total: R$ ${fmt(total)}*\n\nPoderiam confirmar a data de entrega (Quarta a Sábado) e a taxa para o meu bairro? Obrigado(a)!`;
+    msg += `\n*Total: R$ ${fmt(total)}*\n`;
+    if(address){
+      msg += `\n*Endereço:* ${address}${number ? ', nº ' + number : ' (sem número)'}`;
+    }
+    if(ref){ msg += `\n*Ponto de referência:* ${ref}`; }
+    if(payment){
+      msg += `\n*Pagamento:* ${payment}`;
+      if(payment === 'Dinheiro' && change){ msg += ` (troco para R$ ${change})`; }
+    }
+    msg += `\n\nPoderiam confirmar a data de entrega (Quarta a Sábado) e a taxa para o meu bairro? Obrigado(a)!`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   });
