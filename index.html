@@ -263,6 +263,37 @@
   .addon-row:first-of-type{border-top:none;}
   .addon-row .add-btn{font-size:12px; padding:6px 12px;}
 
+  /* ---------- ITEM OPTIONS (sabor/molho) ---------- */
+  .item-options{
+    margin-top:14px;
+    display:grid;
+    gap:10px;
+  }
+  .option-group{display:flex; flex-direction:column; gap:6px;}
+  .option-label{
+    font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); font-weight:700;
+  }
+  .option-select{
+    width:100%;
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    border-radius:10px;
+    outline:none;
+    transition:border-color .15s ease;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px;
+  }
+  .option-select:focus{border-color:var(--gold);}
+
   /* ---------- FOOTER ---------- */
   footer{
     margin-top:60px;
@@ -592,7 +623,17 @@
       sub: "Massa leve e fina, com recheios e molhos à sua escolha.",
       icon: "crepe",
       items: [
-        { id:"panqueca-4un", name:"Panquecas Recheadas", size:"Porção com 4 unidades", desc:"Recheio: carne moída ou frango desfiado. Molho: vermelho ou branco.", price:39.90 }
+        {
+          id:"panqueca-4un",
+          name:"Panquecas Recheadas",
+          size:"Porção com 4 unidades",
+          desc:"Escolha o recheio e o molho antes de adicionar.",
+          price:39.90,
+          options: [
+            { key:"recheio", label:"Recheio", choices:["Carne moída","Frango desfiado"] },
+            { key:"molho", label:"Molho", choices:["Vermelho","Branco"] }
+          ]
+        }
       ],
       addons: [
         { id:"add-arroz", name:"Adicional: Arroz Branco (400g)", price:6.00 },
@@ -621,6 +662,10 @@
     }
   ];
 
+  // Lookup of item definitions by id (for items that have selectable options)
+  const itemLookup = {};
+  menuData.forEach(cat => cat.items.forEach(it => { itemLookup[it.id] = it; }));
+
   // ---------- Render menu ----------
   const main = document.getElementById('menu');
   const fmt = n => n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -630,12 +675,29 @@
     section.className = 'category';
     section.id = cat.id;
 
-    let itemsHTML = cat.items.map(it => `
+    let itemsHTML = cat.items.map(it => {
+      let optionsHTML = '';
+      if(it.options && it.options.length){
+        optionsHTML = `
+          <div class="item-options">
+            ${it.options.map(opt => `
+              <div class="option-group">
+                <label class="option-label" for="opt-${it.id}-${opt.key}">${opt.label}</label>
+                <select class="option-select" id="opt-${it.id}-${opt.key}" data-item="${it.id}" data-optkey="${opt.key}">
+                  ${opt.choices.map(c => `<option value="${c}">${c}</option>`).join('')}
+                </select>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
       <div class="item">
         <div class="item-info">
           <h3>${it.name}</h3>
           ${it.size ? `<span class="item-size">${it.size}</span>` : ''}
           <p class="item-desc">${it.desc}</p>
+          ${optionsHTML}
         </div>
         <div class="item-side">
           <span class="price">R$ ${fmt(it.price)}</span>
@@ -645,7 +707,8 @@
           </button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     let addonsHTML = '';
     if(cat.addons){
@@ -727,8 +790,9 @@
 
   function updateAddButtons(){
     document.querySelectorAll('.add-btn[data-id]').forEach(btn => {
-      const id = btn.dataset.id;
-      btn.classList.toggle('in-cart', !!(cart[id] && cart[id].qty > 0));
+      const baseId = btn.dataset.id;
+      const inCart = Object.keys(cart).some(key => (key === baseId || key.indexOf(baseId + '::') === 0) && cart[key].qty > 0);
+      btn.classList.toggle('in-cart', inCart);
     });
   }
 
@@ -783,8 +847,23 @@
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('.add-btn');
-    if(btn){
-      addToCart(btn.dataset.id, btn.dataset.name, parseFloat(btn.dataset.price));
+    if(!btn) return;
+
+    const baseId = btn.dataset.id;
+    const itemDef = itemLookup[baseId];
+
+    if(itemDef && itemDef.options && itemDef.options.length){
+      // Item has selectable options (e.g. sabor/molho das panquecas)
+      const selections = itemDef.options.map(opt => {
+        const select = document.getElementById(`opt-${baseId}-${opt.key}`);
+        return { label: opt.label, value: select ? select.value : opt.choices[0] };
+      });
+      const suffix = selections.map(s => s.value).join('::');
+      const cartId = `${baseId}::${suffix}`;
+      const nameWithOptions = `${btn.dataset.name} (${selections.map(s => `${s.label}: ${s.value}`).join(', ')})`;
+      addToCart(cartId, nameWithOptions, parseFloat(btn.dataset.price));
+    } else {
+      addToCart(baseId, btn.dataset.name, parseFloat(btn.dataset.price));
     }
   });
 
