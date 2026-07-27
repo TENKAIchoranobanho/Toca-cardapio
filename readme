@@ -6,6 +6,6 @@ Site de cardápio de página única, pronto para publicar gratuitamente no **Git
 - Mostra todos os pratos, porções, adicionais e preços do cardápio em PDF.
 - Cada item tem um botão "Adicionar" que monta um pedido.
 - Um carrinho flutuante mostra o total e abre uma lista com quantidade ajustável.
-- O botão "Enviar pedido pelo WhatsApp" monta uma mensagem automática com os itens, quantidades e total, e abre direto no WhatsApp (44) 99909-1697.
+- O botão "Enviar pedido pelo WhatsApp" monta uma mensagem automática com os itens, quantidades e total, e abre direto no WhatsApp .
 - Funciona bem no celular (é onde a maioria dos clientes vai acessar).
 
