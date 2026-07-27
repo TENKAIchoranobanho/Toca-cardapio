@@ -7,19 +7,19 @@
 <meta name="description" content="Cardápio online da Toca do Delivery. Peça pelo WhatsApp: (44) 99909-1697">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14110d;
-    --bg-alt:#1c1610;
-    --bg-card:#211a13;
-    --gold:#f2b705;
-    --gold-deep:#c98f02;
-    --red:#b8323a;
-    --red-deep:#8f2530;
-    --cream:#f3ecdd;
-    --muted:#a6957c;
-    --line:#352a1e;
+    --bg:#111111;
+    --bg-alt:#1a1a1a;
+    --bg-card:#222222;
+    --gold:#eab308;
+    --gold-deep:#ca8a04;
+    --red:#ef4444;
+    --red-deep:#dc2626;
+    --cream:#d1d5db;
+    --muted:#9ca3af;
+    --line:#333333;
     --shadow: 0 10px 30px rgba(0,0,0,.45);
     --radius: 18px;
   }
@@ -28,7 +28,9 @@
   body{
     margin:0;
     background:
-      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(242,183,5,.10), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(234,179,8,.16), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 30%, rgba(239,68,68,.08), transparent 65%),
+      radial-gradient(ellipse 600px 500px at -10% 70%, rgba(234,179,8,.05), transparent 60%),
       var(--bg);
     color:var(--cream);
     font-family:'Inter',system-ui,sans-serif;
@@ -36,8 +38,8 @@
     padding-bottom:90px;
   }
   h1,h2,h3,.display{
-    font-family:'Fraunces',serif;
-    font-weight:700;
+    font-family:'Inter',system-ui,sans-serif;
+    font-weight:800;
     letter-spacing:-0.01em;
   }
   a{color:inherit;}
@@ -74,35 +76,53 @@
     font-size:clamp(2.4rem, 8vw, 3.6rem);
     line-height:1;
     margin:0;
-    color:var(--cream);
+    text-transform:uppercase;
+    background:linear-gradient(100deg, #fcd34d 0%, var(--gold) 35%, #fbbf24 55%, var(--gold) 80%, #fcd34d 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:shine 6s linear infinite;
+  }
+  @keyframes shine{
+    0%{background-position:0% center;}
+    100%{background-position:200% center;}
   }
   .brand em{
-    font-style:italic;
-    color:var(--gold);
-    font-weight:600;
+    font-style:normal;
+    font-weight:800;
   }
   .tagline{
-    color:var(--muted);
+    color:var(--red);
     font-size:15px;
     letter-spacing:.06em;
     text-transform:uppercase;
     margin:14px 0 26px;
+    font-weight:600;
+  }
+  header .whatsapp-btn{
+    background:linear-gradient(135deg, #fcd34d, var(--gold) 60%, var(--gold-deep));
+    animation:pulse-glow 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse-glow{
+    0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 0 rgba(234,179,8,.35);}
+    50%{box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 10px rgba(234,179,8,0);}
   }
   .whatsapp-btn{
     display:inline-flex; align-items:center; gap:10px;
     background:var(--gold);
-    color:#1c1610;
+    color:#111111;
     font-weight:700;
     font-size:15px;
     padding:14px 26px;
     border-radius:100px;
     text-decoration:none;
     box-shadow:var(--shadow);
-    transition:transform .15s ease, background .15s ease;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
     border:none;
     cursor:pointer;
   }
-  .whatsapp-btn:hover{background:var(--gold-deep); transform:translateY(-1px);}
+  .whatsapp-btn:hover{background:var(--gold-deep); transform:translateY(-2px) scale(1.02);}
   .whatsapp-btn svg{width:18px;height:18px;flex:none;}
 
   .notice{
@@ -146,9 +166,10 @@
     transition:all .15s ease;
   }
   .catnav a.active, .catnav a:hover{
-    color:#1c1610;
-    background:var(--gold);
+    color:#111111;
+    background:linear-gradient(135deg, #fcd34d, var(--gold));
     border-color:var(--gold);
+    box-shadow:0 2px 10px rgba(234,179,8,.3);
   }
 
   /* ---------- MENU SECTIONS ---------- */
@@ -163,11 +184,13 @@
   .seal{
     flex:none; width:46px; height:46px;
     border-radius:50%;
-    background:var(--red);
+    background:linear-gradient(135deg, #f87171, var(--red) 55%, var(--red-deep));
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 14px rgba(184,50,58,.35);
+    box-shadow:0 4px 14px rgba(239,68,68,.4);
+    transition:transform .2s ease;
   }
-  .seal svg{width:22px; height:22px; color:var(--cream);}
+  .cat-head:hover .seal{transform:rotate(-8deg) scale(1.06);}
+  .seal svg{width:22px; height:22px; color:#fff;}
   .cat-head h2{font-size:clamp(1.5rem,4vw,1.9rem); margin:0; color:var(--cream);}
   .cat-sub{color:var(--muted); font-size:13.5px; margin-top:2px;}
 
@@ -179,6 +202,15 @@
     padding:20px;
     display:flex; justify-content:space-between; gap:18px;
     align-items:flex-start;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .5s ease;
+    opacity:0;
+    transform:translateY(18px);
+  }
+  .item.in-view{opacity:1; transform:translateY(0);}
+  .item:hover{
+    transform:translateY(-3px);
+    border-color:rgba(234,179,8,.45);
+    box-shadow:0 14px 30px rgba(0,0,0,.4), 0 0 0 1px rgba(234,179,8,.08) inset;
   }
   .item-info{flex:1; min-width:0;}
   .item-info h3{font-size:1.08rem; margin:0 0 4px; color:var(--cream); font-weight:600;}
@@ -193,7 +225,7 @@
   .item-side{
     flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:10px;
   }
-  .price{font-family:'Fraunces',serif; font-weight:700; font-size:1.15rem; color:var(--gold); white-space:nowrap;}
+  .price{font-family:'Inter',sans-serif; font-weight:800; font-size:1.15rem; color:var(--gold); white-space:nowrap;}
   .add-btn{
     display:flex; align-items:center; gap:6px;
     background:transparent;
@@ -207,8 +239,9 @@
     transition:all .15s ease;
     white-space:nowrap;
   }
-  .add-btn:hover{background:var(--gold); color:#1c1610;}
-  .add-btn.in-cart{background:var(--gold); color:#1c1610;}
+  .add-btn:hover{background:var(--gold); color:#111111; transform:scale(1.05); box-shadow:0 4px 14px rgba(234,179,8,.35);}
+  .add-btn:active{transform:scale(.96);}
+  .add-btn.in-cart{background:var(--gold); color:#111111;}
 
   .addons-box{
     margin-top:16px;
@@ -251,8 +284,8 @@
   .cart-bar.visible{display:flex;}
   .cart-pill{
     pointer-events:auto;
-    background:var(--gold);
-    color:#1c1610;
+    background:linear-gradient(135deg, #fcd34d, var(--gold));
+    color:#111111;
     border-radius:100px;
     box-shadow:0 12px 30px rgba(0,0,0,.5);
     display:flex; align-items:center; gap:14px;
@@ -261,11 +294,18 @@
     cursor:pointer;
     max-width:520px;
     width:100%;
+    transition:transform .15s ease;
+  }
+  .cart-pill.pop{animation:pop .28s ease;}
+  @keyframes pop{
+    0%{transform:scale(1);}
+    40%{transform:scale(1.05);}
+    100%{transform:scale(1);}
   }
   .cart-pill .count{font-size:14px;}
-  .cart-pill .total{margin-left:auto; font-family:'Fraunces',serif;}
+  .cart-pill .total{margin-left:auto; font-family:'Inter',sans-serif; font-weight:800;}
   .cart-pill .open-icon{
-    background:#1c1610; color:var(--gold);
+    background:#111111; color:var(--gold);
     border-radius:50%; width:34px; height:34px;
     display:flex; align-items:center; justify-content:center; flex:none;
   }
@@ -330,9 +370,9 @@
     display:flex; justify-content:space-between; align-items:baseline;
     margin-bottom:14px; font-size:15px;
   }
-  .subtotal-row .value{font-family:'Fraunces',serif; font-weight:700; font-size:1.4rem; color:var(--gold);}
+  .subtotal-row .value{font-family:'Inter',sans-serif; font-weight:800; font-size:1.4rem; color:var(--gold);}
   .send-btn{
-    width:100%; background:var(--gold); color:#291f14; border:none;
+    width:100%; background:var(--gold); color:#111111; border:none;
     border-radius:100px; padding:15px; font-weight:800; font-size:15px;
     display:flex; align-items:center; justify-content:center; gap:10px;
     cursor:pointer;
@@ -394,6 +434,13 @@
     font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4;
   }
 
+  @media (prefers-reduced-motion: reduce){
+    .brand{animation:none;}
+    header .whatsapp-btn{animation:none;}
+    .item{opacity:1; transform:none; transition:none;}
+    .cart-pill.pop{animation:none;}
+  }
+
   @media (max-width:480px){
     .item{flex-direction:column;}
     .item-side{flex-direction:row; width:100%; justify-content:space-between; align-items:center;}
@@ -406,14 +453,14 @@
   <svg class="den-arch" viewBox="0 0 680 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
       <radialGradient id="glow" cx="50%" cy="10%" r="75%">
-        <stop offset="0%" stop-color="#f2b705" stop-opacity="0.35"/>
-        <stop offset="55%" stop-color="#f2b705" stop-opacity="0.08"/>
-        <stop offset="100%" stop-color="#f2b705" stop-opacity="0"/>
+        <stop offset="0%" stop-color="#eab308" stop-opacity="0.35"/>
+        <stop offset="55%" stop-color="#eab308" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
       </radialGradient>
     </defs>
     <ellipse cx="340" cy="40" rx="320" ry="120" fill="url(#glow)"/>
-    <path d="M40 260 C40 120 160 20 340 20 C520 20 640 120 640 260" stroke="#352a1e" stroke-width="2" fill="none"/>
-    <path d="M80 260 C80 145 190 55 340 55 C490 55 600 145 600 260" stroke="#352a1e" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M40 260 C40 120 160 20 340 20 C520 20 640 120 640 260" stroke="#333333" stroke-width="2" fill="none"/>
+    <path d="M80 260 C80 145 190 55 340 55 C490 55 600 145 600 260" stroke="#333333" stroke-width="1" fill="none" opacity=".6"/>
   </svg>
   <div class="inner wrap">
     <div class="eyebrow">Gastronomia no conforto do seu lar</div>
@@ -433,6 +480,7 @@
 <nav class="catnav">
   <div class="wrap">
     <a href="#pratos-principais">Pratos Principais</a>
+    <a href="#oriental">Culinária Oriental</a>
     <a href="#panquecas">Panquecas Recheadas</a>
     <a href="#peixes-combos">Peixes, Porções &amp; Combos</a>
     <a href="#leve">Acompanhamento Leve</a>
@@ -471,6 +519,8 @@
   <div class="drawer-body" id="drawerBody"></div>
   <div class="drawer-foot">
     <div class="delivery-form">
+      <label class="field-label" for="nameInput">Seu nome</label>
+      <input type="text" id="nameInput" placeholder="Como podemos te chamar?">
       <label class="field-label" for="addressInput">Endereço de entrega</label>
       <input type="text" id="addressInput" placeholder="Rua, bairro">
       <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
@@ -510,7 +560,8 @@
     fish: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-6 11-6 9 6 9 6-2 6-9 6-11-6-11-6z"/><circle cx="16" cy="10" r=".6" fill="currentColor" stroke="none"/><path d="M2 12c1.5-1 2.5-1 3 0"/></svg>',
     crepe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="5"/><path d="M6 9.5c2 2 10 2 12 0"/></svg>',
     combo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>',
-    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20c8 0 14-6 16-16-10 2-16 8-16 16z"/><path d="M6 18c3-4 7-8 12-10"/></svg>'
+    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20c8 0 14-6 16-16-10 2-16 8-16 16z"/><path d="M6 18c3-4 7-8 12-10"/></svg>',
+    oriental: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14c2 4 16 4 18 0"/><path d="M4 14 12 4l8 10"/><path d="M12 4v10"/></svg>'
   };
 
   const menuData = [
@@ -524,6 +575,15 @@
         { id:"tilapia-meia", name:"Filé de Tilápia ao Molho Branco", size:"Meia porção · individual ou casal", desc:"Acompanha arroz e salada completa.", price:54.90 },
         { id:"parmegiana-inteira", name:"Bife à Parmegiana", size:"Porção inteira · serve até 3 pessoas", desc:"Acompanha arroz e salada completa.", price:89.90 },
         { id:"parmegiana-meia", name:"Bife à Parmegiana", size:"Meia porção · individual ou casal", desc:"Acompanha arroz e salada completa.", price:54.90 }
+      ]
+    },
+    {
+      id: "oriental",
+      title: "Culinária Oriental",
+      sub: "Fresca e saborosa, direto do mar pra sua mesa.",
+      icon: "oriental",
+      items: [
+        { id:"barca-sashimi", name:"Barca de Sashimi de Tilápia", size:"500g de sashimi fresco e selecionado", desc:"Servido sobre repolho cortado bem fino e cebola em rodelas finas. Acompanha sunomono, kani, molho shoyo e gengibre.", price:74.90 }
       ]
     },
     {
@@ -629,6 +689,7 @@
   function saveAddress(){
     try{
       localStorage.setItem(ADDRESS_KEY, JSON.stringify({
+        name: document.getElementById('nameInput').value,
         address: document.getElementById('addressInput').value,
         number: document.getElementById('numberInput').value,
         ref: document.getElementById('refInput').value,
@@ -641,6 +702,7 @@
   function loadAddress(){
     try{
       const saved = JSON.parse(localStorage.getItem(ADDRESS_KEY) || '{}');
+      if(saved.name) document.getElementById('nameInput').value = saved.name;
       if(saved.address) document.getElementById('addressInput').value = saved.address;
       if(saved.number) document.getElementById('numberInput').value = saved.number;
       if(saved.ref) document.getElementById('refInput').value = saved.ref;
@@ -713,6 +775,10 @@
     if(!cart[id]) cart[id] = {id, name, price, qty:0};
     cart[id].qty += 1;
     renderAll();
+    const pill = document.getElementById('cartPill');
+    pill.classList.remove('pop');
+    void pill.offsetWidth;
+    pill.classList.add('pop');
   }
 
   document.addEventListener('click', e => {
@@ -755,6 +821,7 @@
     renderAll();
   });
 
+  document.getElementById('nameInput').addEventListener('input', saveAddress);
   document.getElementById('addressInput').addEventListener('input', saveAddress);
   document.getElementById('numberInput').addEventListener('input', saveAddress);
   document.getElementById('refInput').addEventListener('input', saveAddress);
@@ -766,12 +833,14 @@
     const entries = Object.values(cart).filter(l => l.qty > 0);
     if(entries.length === 0) return;
     const {total} = cartTotals();
+    const name = document.getElementById('nameInput').value.trim();
     const address = document.getElementById('addressInput').value.trim();
     const number = document.getElementById('numberInput').value.trim();
     const ref = document.getElementById('refInput').value.trim();
     const payment = document.getElementById('paymentInput').value.trim();
     const change = document.getElementById('changeInput').value.trim();
     let msg = 'Olá! Gostaria de fazer o seguinte pedido na *Toca do Delivery*:\n\n';
+    if(name){ msg += `*Nome:* ${name}\n\n`; }
     entries.forEach(l => {
       msg += `• ${l.qty}x ${l.name} — R$ ${fmt(l.qty * l.price)}\n`;
     });
@@ -803,6 +872,17 @@
     });
   }, { rootMargin: '-40% 0px -50% 0px' });
   sections.forEach(s => s && observer.observe(s));
+
+  // Fade-in animation for item cards as they enter the viewport
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.item').forEach(el => revealObserver.observe(el));
 
   renderAll();
 })();
