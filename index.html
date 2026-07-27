@@ -606,10 +606,24 @@
       sub: "Feitos como em casa, na medida certa para você ou pra família toda.",
       icon: "fish",
       items: [
-        { id:"tilapia-inteira", name:"Filé de Tilápia ao Molho Branco", size:"Porção inteira · serve até 3 pessoas", desc:"Acompanha arroz e salada completa.", price:89.90 },
-        { id:"tilapia-meia", name:"Filé de Tilápia ao Molho Branco", size:"Meia porção · individual ou casal", desc:"Acompanha arroz e salada completa.", price:54.90 },
-        { id:"parmegiana-inteira", name:"Bife à Parmegiana", size:"Porção inteira · serve até 3 pessoas", desc:"Acompanha arroz e salada completa.", price:89.90 },
-        { id:"parmegiana-meia", name:"Bife à Parmegiana", size:"Meia porção · individual ou casal", desc:"Acompanha arroz e salada completa.", price:54.90 }
+        {
+          id:"tilapia-molho-branco",
+          name:"Filé de Tilápia ao Molho Branco",
+          desc:"Acompanha arroz e salada completa. Escolha o tamanho da porção.",
+          sizes: [
+            { label:"Porção inteira · serve até 3 pessoas", price:89.90 },
+            { label:"Meia porção · individual ou casal", price:54.90 }
+          ]
+        },
+        {
+          id:"parmegiana",
+          name:"Bife à Parmegiana",
+          desc:"Acompanha arroz e salada completa. Escolha o tamanho da porção.",
+          sizes: [
+            { label:"Porção inteira · serve até 3 pessoas", price:89.90 },
+            { label:"Meia porção · individual ou casal", price:54.90 }
+          ]
+        }
       ]
     },
     {
@@ -651,7 +665,16 @@
       icon: "combo",
       items: [
         { id:"combo-familia", name:"Combo Família", size:null, desc:"Iscas de filé de tilápia frita, tiras de filé de frango frito, batata frita, mandioca frita e molho especial da casa.", price:74.90 },
-        { id:"tilapia-frita", name:"Tilápia Frita", size:null, desc:"Deliciosas e crocantes iscas de tilápia frita com molho da casa. Acompanha batata frita ou mandioca frita.", price:64.90 },
+        {
+          id:"tilapia-frita",
+          name:"Tilápia Frita",
+          size:null,
+          desc:"Deliciosas e crocantes iscas de tilápia frita com molho da casa. Escolha o acompanhamento antes de adicionar.",
+          price:64.90,
+          options: [
+            { key:"acompanhamento", label:"Acompanhamento", choices:["Batata frita","Mandioca frita"] }
+          ]
+        },
         { id:"batata-louca", name:"Batata Louca", size:null, desc:"Batata frita coberta com muçarela, catupiry, bacon, calabresa, azeitona, cebolinha e orégano.", price:59.90 }
       ]
     },
@@ -695,6 +718,23 @@
           </div>
         `;
       }
+
+      let sizeHTML = '';
+      if(it.sizes && it.sizes.length){
+        sizeHTML = `
+          <div class="item-options">
+            <div class="option-group">
+              <label class="option-label" for="size-${it.id}">Tamanho</label>
+              <select class="option-select" id="size-${it.id}" data-item="${it.id}">
+                ${it.sizes.map((s, i) => `<option value="${i}">${s.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      const displayPrice = it.sizes ? it.sizes[0].price : it.price;
+
       return `
       <div class="item">
         <div class="item-info">
@@ -702,10 +742,11 @@
           ${it.size ? `<span class="item-size">${it.size}</span>` : ''}
           <p class="item-desc">${it.desc}</p>
           ${optionsHTML}
+          ${sizeHTML}
         </div>
         <div class="item-side">
-          <span class="price">R$ ${fmt(it.price)}</span>
-          <button class="add-btn" data-id="${it.id}" data-name="${it.name}${it.size ? ' — ' + it.size : ''}" data-price="${it.price}">
+          <span class="price" id="price-${it.id}">R$ ${fmt(displayPrice)}</span>
+          <button class="add-btn" data-id="${it.id}" data-name="${it.name}${it.size ? ' — ' + it.size : ''}" ${it.sizes ? '' : `data-price="${it.price}"`}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
             Adicionar
           </button>
@@ -856,8 +897,16 @@
     const baseId = btn.dataset.id;
     const itemDef = itemLookup[baseId];
 
-    if(itemDef && itemDef.options && itemDef.options.length){
-      // Item has selectable options (e.g. sabor/molho das panquecas)
+    if(itemDef && itemDef.sizes && itemDef.sizes.length){
+      // Item has a size selector with its own price per size (e.g. inteira/meia)
+      const sizeSelect = document.getElementById(`size-${baseId}`);
+      const idx = sizeSelect ? parseInt(sizeSelect.value, 10) : 0;
+      const chosenSize = itemDef.sizes[idx];
+      const cartId = `${baseId}::${chosenSize.label}`;
+      const nameWithSize = `${btn.dataset.name} — ${chosenSize.label}`;
+      addToCart(cartId, nameWithSize, chosenSize.price);
+    } else if(itemDef && itemDef.options && itemDef.options.length){
+      // Item has selectable options (e.g. sabor/molho, acompanhamento)
       const selections = itemDef.options.map(opt => {
         const select = document.getElementById(`opt-${baseId}-${opt.key}`);
         return { label: opt.label, value: select ? select.value : opt.choices[0] };
@@ -869,6 +918,18 @@
     } else {
       addToCart(baseId, btn.dataset.name, parseFloat(btn.dataset.price));
     }
+  });
+
+  // Update the displayed price when a size selector changes
+  document.addEventListener('change', e => {
+    const sel = e.target.closest('select[id^="size-"]');
+    if(!sel) return;
+    const baseId = sel.dataset.item;
+    const itemDef = itemLookup[baseId];
+    if(!itemDef || !itemDef.sizes) return;
+    const idx = parseInt(sel.value, 10);
+    const priceSpan = document.getElementById(`price-${baseId}`);
+    if(priceSpan) priceSpan.textContent = 'R$ ' + fmt(itemDef.sizes[idx].price);
   });
 
   document.getElementById('drawerBody').addEventListener('click', e => {
