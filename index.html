@@ -356,6 +356,7 @@
   .overlay{
     position:fixed; inset:0; background:rgba(10,8,6,.7);
     z-index:50; display:none;
+    -webkit-tap-highlight-color:transparent;
   }
   .overlay.visible{display:block;}
   .drawer{
@@ -363,25 +364,36 @@
     background:var(--bg-alt);
     border-top:1px solid var(--line);
     border-radius:24px 24px 0 0;
-    max-height:82vh;
+    height:min(92dvh, 92vh);
+    max-height:min(92dvh, 92vh);
     display:flex; flex-direction:column;
     transform:translateY(100%);
     transition:transform .28s ease;
+    overscroll-behavior:contain;
   }
   .drawer.visible{transform:translateY(0);}
   .drawer-head{
     display:flex; align-items:center; justify-content:space-between;
-    padding:20px 22px 14px;
+    padding:16px 22px 12px;
     border-bottom:1px solid var(--line);
+    flex:none;
   }
-  .drawer-head h3{margin:0; font-size:1.2rem;}
+  .drawer-head h3{margin:0; font-size:1.15rem;}
   .drawer-close{
     background:none; border:none; color:var(--muted); cursor:pointer;
-    width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
   }
   .drawer-close svg{width:20px;height:20px;}
-  .drawer-body{overflow-y:auto; padding:10px 22px;}
-  .drawer-empty{color:var(--muted); text-align:center; padding:40px 0; font-size:14px;}
+  .drawer-scroll{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  .drawer-body{padding:10px 22px 4px;}
+  .drawer-empty{color:var(--muted); text-align:center; padding:28px 0; font-size:14px;}
   .cart-line{
     display:flex; align-items:center; gap:12px;
     padding:14px 0;
@@ -389,7 +401,7 @@
   }
   .cart-line:last-child{border-bottom:none;}
   .cart-line-info{flex:1; min-width:0;}
-  .cart-line-info .name{font-weight:600; font-size:14.5px;}
+  .cart-line-info .name{font-weight:600; font-size:14.5px; word-break:break-word;}
   .cart-line-info .size{color:var(--gold); font-size:12px; font-weight:700; text-transform:uppercase;}
   .qty-ctrl{
     display:flex; align-items:center; gap:10px;
@@ -397,15 +409,26 @@
     border-radius:100px; padding:4px 6px; flex:none;
   }
   .qty-ctrl button{
-    width:26px; height:26px; border-radius:50%; border:none;
-    background:var(--line); color:var(--cream); font-size:16px;
+    width:32px; height:32px; border-radius:50%; border:none;
+    background:var(--line); color:var(--cream); font-size:18px;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
   .qty-ctrl span{min-width:16px; text-align:center; font-weight:700; font-size:14px;}
   .cart-line .line-price{width:78px; text-align:right; font-weight:700; color:var(--gold); font-size:14px; flex:none;}
-  .drawer-foot{
-    padding:16px 22px calc(16px + env(safe-area-inset-bottom));
+  .drawer-form-wrap{
+    padding:8px 22px 12px;
     border-top:1px solid var(--line);
+  }
+  .drawer-totals{
+    padding:4px 22px 12px;
+  }
+  .drawer-actions{
+    flex:none;
+    padding:12px 22px calc(12px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background:var(--bg-alt);
   }
   .subtotal-row{
     display:flex; justify-content:space-between; align-items:center;
@@ -414,21 +437,27 @@
   .subtotal-row .value{font-family:'Inter',sans-serif; font-weight:600; font-size:14px; color:var(--cream);}
   .send-btn{
     width:100%; background:var(--gold); color:#111111; border:none;
-    border-radius:100px; padding:15px; font-weight:800; font-size:15px;
+    border-radius:100px; padding:16px; font-weight:800; font-size:15px;
     display:flex; align-items:center; justify-content:center; gap:10px;
     cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
   .send-btn svg{width:18px;height:18px;}
   .clear-link{
     display:block; text-align:center; margin-top:10px;
     color:var(--muted); font-size:12.5px; text-decoration:underline; cursor:pointer;
     background:none; border:none; width:100%;
+    padding:8px;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
+  body.drawer-open{overflow:hidden;}
+  body.drawer-open .cart-bar{display:none !important;}
 
   .delivery-form{
-    padding:4px 0 16px;
-    border-bottom:1px solid var(--line);
-    margin-bottom:14px;
+    padding:4px 0 8px;
+    margin-bottom:0;
   }
   .delivery-form .field-label{
     display:block;
@@ -442,11 +471,13 @@
     border:1px solid var(--line);
     color:var(--cream);
     font-family:'Inter',sans-serif;
-    font-size:14.5px;
-    padding:11px 14px;
+    font-size:16px;
+    padding:12px 14px;
     border-radius:10px;
     outline:none;
     transition:border-color .15s ease;
+    -webkit-appearance:none;
+    appearance:none;
   }
   .delivery-form input::placeholder{color:var(--muted); opacity:.7;}
   .delivery-form input:focus{border-color:var(--gold);}
@@ -456,8 +487,8 @@
     border:1px solid var(--line);
     color:var(--cream);
     font-family:'Inter',sans-serif;
-    font-size:14.5px;
-    padding:11px 14px;
+    font-size:16px;
+    padding:12px 36px 12px 14px;
     border-radius:10px;
     outline:none;
     transition:border-color .15s ease;
@@ -575,55 +606,61 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
   </div>
-  <div class="drawer-body" id="drawerBody"></div>
-  <div class="drawer-foot">
-    <div class="delivery-form">
-      <label class="field-label" for="nameInput">Seu nome</label>
-      <input type="text" id="nameInput" placeholder="Como podemos te chamar?">
-      <label class="field-label" for="deliveryTypeInput">Retirada ou entrega</label>
-      <select id="deliveryTypeInput">
-        <option value="">Selecione...</option>
-        <option value="Retirada">Retirada no local</option>
-        <option value="Entrega">Entrega (+ R$ 3,00)</option>
-      </select>
-      <div id="addressFields">
-        <label class="field-label" for="addressInput">Endereço de entrega</label>
-        <input type="text" id="addressInput" placeholder="Rua, bairro">
-        <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
-        <input type="text" id="numberInput" placeholder="Ex.: 123 — deixe em branco se não tiver">
-        <label class="field-label" for="refInput">Ponto de referência</label>
-        <input type="text" id="refInput" placeholder="Ex.: perto do mercado, portão azul...">
+  <div class="drawer-scroll">
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-form-wrap">
+      <div class="delivery-form">
+        <label class="field-label" for="nameInput">Seu nome</label>
+        <input type="text" id="nameInput" placeholder="Como podemos te chamar?" autocomplete="name">
+        <label class="field-label" for="deliveryTypeInput">Retirada ou entrega</label>
+        <select id="deliveryTypeInput">
+          <option value="">Selecione...</option>
+          <option value="Retirada">Retirada no local</option>
+          <option value="Entrega">Entrega (+ R$ 3,00)</option>
+        </select>
+        <div id="addressFields">
+          <label class="field-label" for="addressInput">Endereço de entrega</label>
+          <input type="text" id="addressInput" placeholder="Rua, bairro" autocomplete="street-address">
+          <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
+          <input type="text" id="numberInput" placeholder="Ex.: 123 — deixe em branco se não tiver" inputmode="numeric">
+          <label class="field-label" for="refInput">Ponto de referência</label>
+          <input type="text" id="refInput" placeholder="Ex.: perto do mercado, portão azul...">
+        </div>
+        <label class="field-label" for="paymentInput">Forma de pagamento</label>
+        <select id="paymentInput">
+          <option value="">Selecione...</option>
+          <option value="Pix">Pix</option>
+          <option value="Cartão de crédito">Cartão de crédito</option>
+          <option value="Cartão de débito">Cartão de débito</option>
+          <option value="Dinheiro">Dinheiro</option>
+        </select>
+        <div class="field-label" id="changeField">Troco para quanto?
+          <input type="text" id="changeInput" placeholder="Ex.: 100,00 — deixe em branco se não precisar" style="margin-top:6px; text-transform:none;" inputmode="decimal">
+        </div>
+        <div class="hint">Essas informações vão junto na mensagem do WhatsApp.</div>
       </div>
-      <label class="field-label" for="paymentInput">Forma de pagamento</label>
-      <select id="paymentInput">
-        <option value="">Selecione...</option>
-        <option value="Pix">Pix</option>
-        <option value="Cartão de crédito">Cartão de crédito</option>
-        <option value="Cartão de débito">Cartão de débito</option>
-        <option value="Dinheiro">Dinheiro</option>
-      </select>
-      <div class="field-label" id="changeField">Troco para quanto?
-        <input type="text" id="changeInput" placeholder="Ex.: 100,00 — deixe em branco se não precisar" style="margin-top:6px; text-transform:none;">
+    </div>
+    <div class="drawer-totals">
+      <div class="subtotal-row">
+        <span>Subtotal</span>
+        <span class="value" id="drawerSubtotal">R$ 0,00</span>
       </div>
-      <div class="hint">Essas informações vão junto na mensagem do WhatsApp.</div>
+      <div class="fee-row" id="deliveryFeeRow" style="display:none;">
+        <span>Taxa de entrega</span>
+        <span class="value" id="drawerFee">R$ 3,00</span>
+      </div>
+      <div class="total-row">
+        <span>Total</span>
+        <span class="value" id="drawerTotal">R$ 0,00</span>
+      </div>
     </div>
-    <div class="subtotal-row">
-      <span>Subtotal</span>
-      <span class="value" id="drawerSubtotal">R$ 0,00</span>
-    </div>
-    <div class="fee-row" id="deliveryFeeRow" style="display:none;">
-      <span>Taxa de entrega</span>
-      <span class="value" id="drawerFee">R$ 3,00</span>
-    </div>
-    <div class="total-row">
-      <span>Total</span>
-      <span class="value" id="drawerTotal">R$ 0,00</span>
-    </div>
-    <button class="send-btn" id="sendBtn">
+  </div>
+  <div class="drawer-actions">
+    <button class="send-btn" id="sendBtn" type="button">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.28-.14-1.64-.81-1.9-.9-.25-.1-.44-.14-.62.14-.18.27-.71.9-.87 1.08-.16.18-.32.2-.6.07-.28-.14-1.17-.43-2.23-1.38-.82-.73-1.38-1.64-1.54-1.92-.16-.28-.02-.43.12-.57.13-.13.28-.32.42-.48.14-.16.18-.28.28-.46.09-.18.05-.34-.02-.48-.07-.14-.62-1.5-.85-2.05-.22-.53-.45-.46-.62-.47h-.53c-.18 0-.46.07-.71.34-.24.27-.93.91-.93 2.22s.96 2.58 1.09 2.76c.13.18 1.9 2.9 4.6 4.06.64.28 1.14.44 1.53.57.64.2 1.23.17 1.69.1.52-.08 1.64-.67 1.87-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.19-.53-.32z"/></svg>
       Enviar pedido pelo WhatsApp
     </button>
-    <button class="clear-link" id="clearCart">Esvaziar pedido</button>
+    <button class="clear-link" id="clearCart" type="button">Esvaziar pedido</button>
   </div>
 </div>
 
@@ -1034,10 +1071,12 @@
   function openDrawer(){
     overlay.classList.add('visible');
     drawer.classList.add('visible');
+    document.body.classList.add('drawer-open');
   }
   function closeDrawer(){
     overlay.classList.remove('visible');
     drawer.classList.remove('visible');
+    document.body.classList.remove('drawer-open');
   }
   document.getElementById('cartPill').addEventListener('click', openDrawer);
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
