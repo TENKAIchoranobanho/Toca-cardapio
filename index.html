@@ -408,10 +408,10 @@
     border-top:1px solid var(--line);
   }
   .subtotal-row{
-    display:flex; justify-content:space-between; align-items:baseline;
-    margin-bottom:14px; font-size:15px;
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:6px; font-size:13.5px; color:var(--muted);
   }
-  .subtotal-row .value{font-family:'Inter',sans-serif; font-weight:800; font-size:1.4rem; color:var(--gold);}
+  .subtotal-row .value{font-family:'Inter',sans-serif; font-weight:600; font-size:14px; color:var(--cream);}
   .send-btn{
     width:100%; background:var(--gold); color:#111111; border:none;
     border-radius:100px; padding:15px; font-weight:800; font-size:15px;
@@ -471,9 +471,22 @@
   .delivery-form select:focus{border-color:var(--gold);}
   #changeField{display:none;}
   #changeField.visible{display:block;}
+  #addressFields{display:none;}
+  #addressFields.visible{display:block;}
   .delivery-form .hint{
     font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4;
   }
+  .fee-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13.5px; color:var(--muted); margin-bottom:6px;
+  }
+  .fee-row .value{color:var(--cream); font-weight:600;}
+  .total-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:15px; font-weight:700; color:var(--cream);
+    margin-top:4px; padding-top:10px; border-top:1px solid var(--line);
+  }
+  .total-row .value{color:var(--gold); font-size:1.1rem;}
 
   @media (prefers-reduced-motion: reduce){
     .brand{animation:none;}
@@ -567,18 +580,26 @@
     <div class="delivery-form">
       <label class="field-label" for="nameInput">Seu nome</label>
       <input type="text" id="nameInput" placeholder="Como podemos te chamar?">
-      <label class="field-label" for="addressInput">Endereço de entrega</label>
-      <input type="text" id="addressInput" placeholder="Rua, bairro">
-      <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
-      <input type="text" id="numberInput" placeholder="Ex.: 123 — deixe em branco se não tiver">
-      <label class="field-label" for="refInput">Ponto de referência</label>
-      <input type="text" id="refInput" placeholder="Ex.: perto do mercado, portão azul...">
+      <label class="field-label" for="deliveryTypeInput">Retirada ou entrega</label>
+      <select id="deliveryTypeInput">
+        <option value="">Selecione...</option>
+        <option value="Retirada">Retirada no local</option>
+        <option value="Entrega">Entrega (+ R$ 3,00)</option>
+      </select>
+      <div id="addressFields">
+        <label class="field-label" for="addressInput">Endereço de entrega</label>
+        <input type="text" id="addressInput" placeholder="Rua, bairro">
+        <label class="field-label" for="numberInput">Número da casa <span style="text-transform:none; opacity:.7;">(se houver)</span></label>
+        <input type="text" id="numberInput" placeholder="Ex.: 123 — deixe em branco se não tiver">
+        <label class="field-label" for="refInput">Ponto de referência</label>
+        <input type="text" id="refInput" placeholder="Ex.: perto do mercado, portão azul...">
+      </div>
       <label class="field-label" for="paymentInput">Forma de pagamento</label>
       <select id="paymentInput">
         <option value="">Selecione...</option>
         <option value="Pix">Pix</option>
-        <option value="Cartão de crédito">Cartão de crédito (na entrega)</option>
-        <option value="Cartão de débito">Cartão de débito (na entrega)</option>
+        <option value="Cartão de crédito">Cartão de crédito</option>
+        <option value="Cartão de débito">Cartão de débito</option>
         <option value="Dinheiro">Dinheiro</option>
       </select>
       <div class="field-label" id="changeField">Troco para quanto?
@@ -588,6 +609,14 @@
     </div>
     <div class="subtotal-row">
       <span>Subtotal</span>
+      <span class="value" id="drawerSubtotal">R$ 0,00</span>
+    </div>
+    <div class="fee-row" id="deliveryFeeRow" style="display:none;">
+      <span>Taxa de entrega</span>
+      <span class="value" id="drawerFee">R$ 3,00</span>
+    </div>
+    <div class="total-row">
+      <span>Total</span>
       <span class="value" id="drawerTotal">R$ 0,00</span>
     </div>
     <button class="send-btn" id="sendBtn">
@@ -811,10 +840,17 @@
     try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){}
   }
 
+  const DELIVERY_FEE = 3.00;
+
+  function isDelivery(){
+    return document.getElementById('deliveryTypeInput').value === 'Entrega';
+  }
+
   function saveAddress(){
     try{
       localStorage.setItem(ADDRESS_KEY, JSON.stringify({
         name: document.getElementById('nameInput').value,
+        deliveryType: document.getElementById('deliveryTypeInput').value,
         address: document.getElementById('addressInput').value,
         number: document.getElementById('numberInput').value,
         ref: document.getElementById('refInput').value,
@@ -828,6 +864,10 @@
     try{
       const saved = JSON.parse(localStorage.getItem(ADDRESS_KEY) || '{}');
       if(saved.name) document.getElementById('nameInput').value = saved.name;
+      if(saved.deliveryType){
+        document.getElementById('deliveryTypeInput').value = saved.deliveryType;
+        toggleDeliveryFields();
+      }
       if(saved.address) document.getElementById('addressInput').value = saved.address;
       if(saved.number) document.getElementById('numberInput').value = saved.number;
       if(saved.ref) document.getElementById('refInput').value = saved.ref;
@@ -844,10 +884,16 @@
     document.getElementById('changeField').classList.toggle('visible', isCash);
   }
 
+  function toggleDeliveryFields(){
+    document.getElementById('addressFields').classList.toggle('visible', isDelivery());
+    updateTotalsDisplay();
+  }
+
   function cartTotals(){
-    let count = 0, total = 0;
-    Object.values(cart).forEach(l => { count += l.qty; total += l.qty * l.price; });
-    return {count, total};
+    let count = 0, subtotal = 0;
+    Object.values(cart).forEach(l => { count += l.qty; subtotal += l.qty * l.price; });
+    const fee = isDelivery() ? DELIVERY_FEE : 0;
+    return {count, subtotal, fee, total: subtotal + fee};
   }
 
   function updateAddButtons(){
@@ -858,12 +904,34 @@
     });
   }
 
-  function renderCartBar(){
-    const {count, total} = cartTotals();
+  function updateTotalsDisplay(){
+    const {count, subtotal, fee, total} = cartTotals();
+
+    // Barra inferior do carrinho
     const bar = document.getElementById('cartBar');
-    bar.classList.toggle('visible', count > 0);
-    document.getElementById('cartCount').textContent = count + (count === 1 ? ' item' : ' itens');
-    document.getElementById('cartTotal').textContent = 'R$ ' + fmt(total);
+    if(bar){
+      bar.classList.toggle('visible', count > 0);
+      document.getElementById('cartCount').textContent = count + (count === 1 ? ' item' : ' itens');
+      document.getElementById('cartTotal').textContent = 'R$ ' + fmt(total);
+    }
+
+    // Drawer: subtotal, taxa e total
+    const subEl = document.getElementById('drawerSubtotal');
+    if(subEl) subEl.textContent = 'R$ ' + fmt(subtotal);
+
+    const feeRow = document.getElementById('deliveryFeeRow');
+    if(feeRow){
+      feeRow.style.display = fee > 0 ? 'flex' : 'none';
+      const feeEl = document.getElementById('drawerFee');
+      if(feeEl) feeEl.textContent = 'R$ ' + fmt(fee);
+    }
+
+    const totalEl = document.getElementById('drawerTotal');
+    if(totalEl) totalEl.textContent = 'R$ ' + fmt(total);
+  }
+
+  function renderCartBar(){
+    updateTotalsDisplay();
   }
 
   function renderDrawer(){
@@ -886,12 +954,10 @@
         </div>
       `).join('');
     }
-    const {total} = cartTotals();
-    document.getElementById('drawerTotal').textContent = 'R$ ' + fmt(total);
+    updateTotalsDisplay();
   }
 
   function renderAll(){
-    renderCartBar();
     renderDrawer();
     updateAddButtons();
     saveCart();
@@ -983,6 +1049,11 @@
   });
 
   document.getElementById('nameInput').addEventListener('input', saveAddress);
+  document.getElementById('deliveryTypeInput').addEventListener('change', () => {
+    toggleDeliveryFields();
+    saveAddress();
+    updateTotalsDisplay();
+  });
   document.getElementById('addressInput').addEventListener('input', saveAddress);
   document.getElementById('numberInput').addEventListener('input', saveAddress);
   document.getElementById('refInput').addEventListener('input', saveAddress);
@@ -993,8 +1064,9 @@
   document.getElementById('sendBtn').addEventListener('click', () => {
     const entries = Object.values(cart).filter(l => l.qty > 0);
     if(entries.length === 0) return;
-    const {total} = cartTotals();
+    const {subtotal, fee, total} = cartTotals();
     const name = document.getElementById('nameInput').value.trim();
+    const deliveryType = document.getElementById('deliveryTypeInput').value.trim();
     const address = document.getElementById('addressInput').value.trim();
     const number = document.getElementById('numberInput').value.trim();
     const ref = document.getElementById('refInput').value.trim();
@@ -1005,16 +1077,29 @@
     entries.forEach(l => {
       msg += `• ${l.qty}x ${l.name} — R$ ${fmt(l.qty * l.price)}\n`;
     });
-    msg += `\n*Total: R$ ${fmt(total)}*\n`;
-    if(address){
-      msg += `\n*Endereço:* ${address}${number ? ', nº ' + number : ' (sem número)'}`;
+    msg += `\n*Subtotal: R$ ${fmt(subtotal)}*`;
+    if(deliveryType){
+      msg += `\n*Tipo:* ${deliveryType === 'Entrega' ? 'Entrega' : 'Retirada no local'}`;
+      if(deliveryType === 'Entrega'){
+        msg += `\n*Taxa de entrega: R$ ${fmt(fee)}*`;
+      }
     }
-    if(ref){ msg += `\n*Ponto de referência:* ${ref}`; }
+    msg += `\n*Total: R$ ${fmt(total)}*\n`;
+    if(deliveryType === 'Entrega'){
+      if(address){
+        msg += `\n*Endereço:* ${address}${number ? ', nº ' + number : ' (sem número)'}`;
+      }
+      if(ref){ msg += `\n*Ponto de referência:* ${ref}`; }
+    }
     if(payment){
       msg += `\n*Pagamento:* ${payment}`;
       if(payment === 'Dinheiro' && change){ msg += ` (troco para R$ ${change})`; }
     }
-    msg += `\n\nPoderiam confirmar a data de entrega (Quarta a Sábado) e a taxa para o meu bairro? Obrigado(a)!`;
+    if(deliveryType === 'Entrega'){
+      msg += `\n\nPoderiam confirmar a data de entrega (Quarta a Sábado)? Obrigado(a)!`;
+    } else {
+      msg += `\n\nPoderiam confirmar a data de retirada (Quarta a Sábado)? Obrigado(a)!`;
+    }
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   });
