@@ -670,11 +670,8 @@
           id:"mini-pasteis-porcao",
           name:"Porção de Mini Pastéis",
           size:"18 unidades",
-          desc:"Escolha o recheio antes de adicionar.",
-          price:39.90,
-          options: [
-            { key:"recheio", label:"Recheio", choices:["Carne c/ catupiry","Frango c/ catupiry"] }
-          ]
+          desc:"Pastéis de carne e frango com catupiry.",
+          price:39.90
         }
       ]
     },
@@ -1017,7 +1014,7 @@
       msg += `\n*Pagamento:* ${payment}`;
       if(payment === 'Dinheiro' && change){ msg += ` (troco para R$ ${change})`; }
     }
-    msg += `\n\n`;
+    msg += `\n\nPoderiam confirmar a data de entrega (Quarta a Sábado) e a taxa para o meu bairro? Obrigado(a)!`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   });
