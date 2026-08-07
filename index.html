@@ -1135,9 +1135,9 @@
       if(payment === 'Dinheiro' && change){ msg += ` (troco para R$ ${change})`; }
     }
     if(deliveryType === 'Entrega'){
-      msg += `\n\nPoderiam confirmar a data de entrega (Quarta a Sábado)? Obrigado(a)!`;
+      msg += `\n\n`;
     } else {
-      msg += `\n\nPoderiam confirmar a data de retirada (Quarta a Sábado)? Obrigado(a)!`;
+      msg += `\n\n`;
     }
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
